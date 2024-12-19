@@ -1,5 +1,3 @@
-import React from 'react'
-
 function ErrPage() {
   return (
     <div className='h-dvh w-dvw text-3xl bg-black text-white flex items-center justify-center font-mono font-bold flex-col'>

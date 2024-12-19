@@ -1,4 +1,3 @@
-import React from 'react'
 import './App.css'
 import {
   BrowserRouter as Router,
@@ -21,7 +20,7 @@ function App() {
       element: <Connect/>,
     },{
       path: "/chat",
-      element: <Chat/>,
+      element: <Chat roomId='1352' username='Varun'/>,
     }
   ];
 

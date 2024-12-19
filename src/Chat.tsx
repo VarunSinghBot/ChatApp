@@ -1,11 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface UserMessage {
-    name: string;
-    message: string
+  name: string;
+  message: string
 }
 
-function Chat() {
+interface ChatProps {
+  roomId: string;
+  username: string;
+}
+
+const Chat: React.FC<ChatProps> = ({roomId, username}) => {
+
+  console.log(roomId, ":", username)
 
   // const [msg, setMsg] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -24,7 +33,9 @@ function Chat() {
     ws.onmessage = (ev) => {
       try {
         const parsedMessage = JSON.parse(ev.data);
-        setMessages((prevMessages) => [...prevMessages, parsedMessage]);
+        if (parsedMessage.name && parsedMessage.message) {
+          setMessages((prevMessages) => [...prevMessages, parsedMessage]);
+        }
         // console.log(messages);
         scrollToBottom();
       } catch(err){
@@ -37,8 +48,8 @@ function Chat() {
       ws.send(JSON.stringify({
         type:"join",
         payload:{
-          roomId: "red",
-          name:"Varun"
+          roomId,
+          name: username,
         }
       }))
     };
@@ -59,17 +70,21 @@ function Chat() {
         wsRef.current.close();
       }
     };
-  },[])
-
-  // Function to parse data recieved from websocket
-  // function parsedMsg(msg:string){
-  //   return JSON.parse(msg)
-  // }
+  },[roomId, username])
 
   // Scroll to the bottom of the messages container
   const scrollToBottom = () => {
-    if (messageRef.current) {
-      messageRef.current.scrollTop = messageRef.current.scrollHeight;
+    messageRef.current?.scrollTo({ top: messageRef.current.scrollHeight, behavior: "smooth" });
+  };
+
+  // Function to copy item to clipboard
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(roomId);
+      toast.success("Text copied to clipboard!",{ className: 'toast-success' });
+    } catch (err) {
+      toast.error("Couldn't copy text", { className: 'toast-error' });
+      console.error("Failed to copy: ", err);
     }
   };
 
@@ -99,31 +114,37 @@ function Chat() {
   return (
     <>
       <div className='h-dvh w-dvw text-white bg-[rgb(20,20,20)] flex items-center justify-center flex-col'>
+      <ToastContainer position="bottom-right" autoClose={1600} />
       
-      <div className='h-[44px] w-[calc(50%+60px)] min-w-[360px] mb-[20px] border-[rgba(255,255,255,0.25)] bg-[rgba(255,255,255,0.025)] rounded-lg hover:border-[rgba(255,255,255,0.35)]'></div>
+      <header className='h-[44px] w-[calc(50%+60px)] min-w-[360px] mb-[20px] border border-white border-solid border-[rgba(255,255,255,0.25)] bg-[rgba(255,255,255,0.025)] rounded-lg hover:border-[rgba(255,255,255,0.35) flex items-center justify-between text-center]'> 
+        <div className='m-4 '>
+          WELCOME TO CHAT APP ~ Developed By ~ Varun
+        </div>
+        <div className='h-full w-fit flex items-center justify-center '>
+          <div onClick={copyToClipboard} className='h-fit w-fit p-[6px] cursor-pointer ml-4 flex items-center justify-center rounded-md border border-solid border-black text-black bg-white'>
+            <img src="/Copy.svg" alt="Copy" className='h-[20px] w-[20px]'/>
+          </div>
+          <button onClick={copyToClipboard} className='mr-4 p-1 pl-2 pr-2 rounded-md border border-solid border-black text-black bg-white'>
+            Room ID: {roomId}
+          </button>
+        </div>
+        
+      </header>
 
       <div ref={messageRef} className='min-h-[35%] max-h-[38rem] h-[38rem] w-[calc(50%+60px)] min-w-[360px] p-[8px] border border-solid mb-[20px] border-[rgba(255,255,255,0.25)] bg-[rgba(255,255,255,0.025)] rounded-lg hover:border-[rgba(255,255,255,0.35)] overflow-y-scroll scrollbar-hide '>
-        { messages.map((msg, index)=>{
-          {if(!msg) return ;}
+        {messages.map((msg, idx)=>{
+          // {if(!msg) return ;}
           return (<>
-          <div key={index} className='h-auto w-full flex justify-start relative'>
-            <span className='w-[10px] h-[10px] mt-2 bg-[rgba(255,255,255,1)] absolute left-0 rotate-180'  style={{ clipPath: "polygon(0% 0%, 100% 100%, 0% 100%)" }}></span>
-            <div className='m-2 h-fit w-fit max-w-[38rem] bg-[rgba(255,255,255,1)] p-2  rounded-sm text-[black] flex  items-center justify-center'>
-              {msg.name} : {msg.message}
+          <div key={idx} className={`flex ${msg.name === username ? "justify-end" : "justify-start" } mb-2`}>
+            <div className={`max-w-[75%] p-2 rounded-sm ${msg.name === username ? "bg-blue-500 text-white" : "bg-gray-300 text-black"}`}>
+              <strong>{msg.name}: </strong> {msg.message}
             </div>
           </div>
-
-          {/* <div className='h-auto w-full flex justify-end border relative'>
-            <span className='w-[10px] h-[10px] mt-2 bg-[rgba(255,255,255,1)] absolute right-0 rotate-90'  style={{ clipPath: "polygon(0% 0%, 100% 100%, 0% 100%)" }}></span>
-            <div className='m-2 h-fit w-fit max-w-[38rem] bg-[rgba(255,255,255,1)] p-2  rounded-sm text-[black] flex  items-center justify-center'>
-              {msg}
-            </div>
-          </div> */}
         </>)})}
-
+            <div className='h-[60px] w-full bg-transparent text-black'></div>
       </div>
       <div className='h-auto w-[100%] flex items-center justify-center'> 
-        <input type="text" name="" id="msgInputBox" ref={inputRef}  placeholder='type ur msg here' className='h-[44px] w-[50%] min-w-[316px] text-[18px] px-2 rounded-lg border border-solid border-[rgba(255,255,255,0.25)] bg-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.35)]'/>
+        <input type="text" name="" id="msgInputBox" ref={inputRef}  placeholder='Type ur msg here ...' className='h-[44px] w-[50%] min-w-[316px] text-[18px] px-2 rounded-lg border border-solid border-[rgba(255,255,255,0.25)] bg-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.35)]'/>
 
         <button onClick={()=>{
           // sendMessage();
