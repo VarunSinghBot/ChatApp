@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useLocation } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -12,9 +13,9 @@ interface ChatProps {
   username: string;
 }
 
-const Chat: React.FC<ChatProps> = ({roomId, username}) => {
+const Chat = () => {
 
-  console.log(roomId, ":", username)
+  // console.log(roomId, ":", username)
 
   // const [msg, setMsg] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -25,6 +26,9 @@ const Chat: React.FC<ChatProps> = ({roomId, username}) => {
 
   const [isConnected, setIsConnected] = useState(false);
   const [isError, setIsError] = useState(false);
+
+  const location = useLocation();
+  const { roomId, username } = location.state as ChatProps;
 
   useEffect(()=>{
     const ws = new WebSocket("ws://localhost:8080");
@@ -136,7 +140,7 @@ const Chat: React.FC<ChatProps> = ({roomId, username}) => {
           // {if(!msg) return ;}
           return (<>
           <div key={idx} className={`flex ${msg.name === username ? "justify-end" : "justify-start" } mb-2`}>
-            <div className={`max-w-[75%] p-2 rounded-sm ${msg.name === username ? "bg-blue-500 text-white" : "bg-gray-300 text-black"}`}>
+            <div className={`max-w-[75%] p-2 rounded-sm ${msg.name === username ? "bg-blue-500 text-white" : "bg-gray-100 text-black"}`}>
               <strong>{msg.name}: </strong> {msg.message}
             </div>
           </div>
@@ -144,7 +148,7 @@ const Chat: React.FC<ChatProps> = ({roomId, username}) => {
             <div className='h-[60px] w-full bg-transparent text-black'></div>
       </div>
       <div className='h-auto w-[100%] flex items-center justify-center'> 
-        <input type="text" name="" id="msgInputBox" ref={inputRef}  placeholder='Type ur msg here ...' className='h-[44px] w-[50%] min-w-[316px] text-[18px] px-2 rounded-lg border border-solid border-[rgba(255,255,255,0.25)] bg-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.35)]'/>
+        <input type="text" name="msg" onKeyDown={(e) => {if (e.key === "Enter") {sendMsg();}}} id="msgInputBox" ref={inputRef}  placeholder='Type ur msg here ...' className='h-[44px] w-[50%] min-w-[316px] text-[18px] px-2 rounded-lg border border-solid border-[rgba(255,255,255,0.25)] bg-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.35)]'/>
 
         <button onClick={()=>{
           // sendMessage();

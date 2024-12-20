@@ -20,7 +20,7 @@ function App() {
       element: <Connect/>,
     },{
       path: "/chat",
-      element: <Chat roomId='1352' username='Varun'/>,
+      element: <Chat/>,
     }
   ];
 
@@ -30,7 +30,7 @@ function App() {
     <>
       <Router>
         <Routes>
-          <Route path="/" element={<Navigate to="/chat" replace />} />
+          <Route path="/" element={<Navigate to="/connect" replace />} />
           <Route path="/" element={<Layout />}>
             {routes.map((r, index) => {
               return <Route key={index} path={r.path} element={r.element} />;
