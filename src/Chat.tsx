@@ -4,8 +4,12 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 interface UserMessage {
-  name: string;
-  message: string
+  type: string;
+  payload: {
+    name: string;
+    message: string
+  }
+ 
 }
 
 interface ChatProps {
@@ -37,7 +41,8 @@ const Chat = () => {
     ws.onmessage = (ev) => {
       try {
         const parsedMessage = JSON.parse(ev.data);
-        if (parsedMessage.name && parsedMessage.message) {
+         // ev.data >>>>> [type:"chat"||"system" ,{name: "username",msg:"message"}]
+        if (parsedMessage.payload.name && parsedMessage.payload.message) {
           setMessages((prevMessages) => [...prevMessages, parsedMessage]);
         }
         // console.log(messages);
@@ -65,6 +70,8 @@ const Chat = () => {
 
     ws.onclose = () => {
       setIsConnected(false);
+      // console.log();
+      // console.log(ev.data)
       console.log("WebSocket connection closed");
     };
 
@@ -139,9 +146,9 @@ const Chat = () => {
         {messages.map((msg, idx)=>{
           // {if(!msg) return ;}
           return (<>
-          <div key={idx} className={`flex ${msg.name === username ? "justify-end" : "justify-start" } mb-2`}>
-            <div className={`max-w-[75%] p-2 rounded-sm ${msg.name === username ? "bg-blue-500 text-white" : "bg-gray-100 text-black"}`}>
-              <strong>{msg.name}: </strong> {msg.message}
+          <div key={idx} className={`flex ${msg.type === "system" ? "justify-center" : msg.payload.name === username ? "justify-end" : "justify-start" } mb-2`}>
+            <div className={`max-w-[75%] p-2 rounded-sm ${msg.type === "system" ? "bg-yellow-600 text-white" :msg.payload.name === username ? "bg-blue-500 text-white" : "bg-gray-100 text-black"}`}>
+              <strong>{ msg.type === "chat" ? msg.payload.name === username ? "" : `${msg.payload.name}:` : ""} </strong> {msg.payload.message}
             </div>
           </div>
         </>)})}
