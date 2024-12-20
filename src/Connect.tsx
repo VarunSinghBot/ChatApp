@@ -1,13 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef } from 'react'
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 
-
-interface UserMessage {
-    name: string;
-    message: string
-}
 
 function Connect() {
     const Navigate = useNavigate();
@@ -15,15 +10,15 @@ function Connect() {
     const nameRef = useRef<HTMLInputElement | null>(null);
     const roomIdRef = useRef<HTMLInputElement | null>(null);
 
-    const copyToClipboard = async () => {
-        try {
-          await navigator.clipboard.writeText("Hello there!");
-          toast.success("Text copied to clipboard!",{ className: 'toast-success' });
-        } catch (err) {
-          toast.error("Couldn't copy text", { className: 'toast-error' });
-          console.error("Failed to copy: ", err);
-        }
-    };
+    // const copyToClipboard = async () => {
+    //     try {
+    //       await navigator.clipboard.writeText("Hello there!");
+    //       toast.success("Text copied to clipboard!",{ className: 'toast-success' });
+    //     } catch (err) {
+    //       toast.error("Couldn't copy text", { className: 'toast-error' });
+    //       console.error("Failed to copy: ", err);
+    //     }
+    // };
 
     const generateNewRoomId = (): string => {
         return Math.floor(1000 + Math.random() * 9000).toString();
